@@ -1,3 +1,5 @@
+require "byebug"
+
 class MyQueue
 
   def initialize
@@ -26,50 +28,6 @@ class MyQueue
 
 end
 
-class MyStack
-
-  def initialize
-    @store = []
-    @max = MinMaxStackQueue.new()
-    @mix = MinMaxStackQueue.new()
-  end
-
-  def pop
-    @store.pop
-    peek.values.each { |val|
-  end
-
-  def push(ele)
-    newhash = Hash.new
-    newnhash[ele] = [min(ele),max(ele)]
-    @store.push(newhash)
-  end
-
-  def peek
-    @store.last
-  end
-
-  def size
-    @store.size
-  end
-
-  def empty?
-    @store.empty?
-  end
-
-  def max(ele)
-    @max = ele if @max.nil?
-    @max = ele if ele > @max
-    @max
-  end
-
-  def min
-    @min = ele if @min.nil?
-    @min = ele if ele > @min
-    @max
-  end
-
-end
 
 class StackQueue
 
@@ -92,31 +50,112 @@ class StackQueue
 
 end
 
-class MinMaxStackQueue
+class MinMaxStack
 
   def initialize
-    @enstack = Stack.new
-    @destack = Stack.new
+    @store = MyStack.new()
   end
 
-  def enqueue(ele)
-    @enstack.push(ele)
-  end
-
-
-  def dequeue
-    until enstack.empty?
-      @destack.push(@enstack.pop)
-    end
-    @destack.pop
-  end
-
-  def max
-    @enstack.max
+  def pop
+    @store.pop
   end
 
   def min
-    @enstack.min
+    empty? ? nil : @store.peek.values[0][0]
   end
 
+  def max
+    empty? ? nil : @store.peek.values[0][1]
+  end
+
+  def push(ele)
+    newhash = Hash.new
+    newhash[ele] = find_min(ele),find_max(ele)
+    @store.push(newhash)
+  end
+
+  def size
+    @store.size
+  end
+
+  def empty?
+    @store.empty?
+  end
+
+  def find_max(ele)
+    empty? ? ele : [max, ele].max
+  end
+
+  def find_min(ele)
+    empty? ? ele : [min, ele].min
+  end
+
+end
+
+
+class MinMaxStackQueue
+  attr_reader :instack, :outstack
+
+  def initialize
+    @instack = MinMaxStack.new
+    @outstack = MinMaxStack.new
+  end
+
+  def enqueue(ele)
+    @instack.push(ele)
+  end
+
+  def dequeue
+    if @outstack.empty?
+      until @instack.empty?
+        @outstack.push(@instack.pop.keys[0])
+      end
+        @outstack.pop
+    else
+      @outstack.pop
+    end
+  end
+
+  def size
+    @instack.size + @outstack.size
+  end
+
+  def max
+    return @instack.max if @outstack.empty?
+    return @outstack.max if @instack.empty?
+    [@instack.max, @outstack.max].max
+  end
+
+  def min
+    return @instack.min if @outstack.empty?
+    return @outstack.min if @instack.empty?
+    [@instack.min, @outstack.min].min
+  end
+
+end
+
+class MyStack
+  def initialize(store = [])
+    @store = store
+  end
+
+  def empty?
+    @store.empty?
+  end
+
+  def peek
+    @store.last
+  end
+
+  def pop
+    @store.pop
+  end
+
+  def push(val)
+    @store.push(val)
+  end
+
+  def size
+    @store.size
+  end
 end
